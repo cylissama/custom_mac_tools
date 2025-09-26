@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Exit on error
+set -e
+
+# Find the first .tex file in the current directory
+file=$(ls *.tex 2>/dev/null | head -n 1)
+
+if [ -z "$file" ]; then
+  echo "No .tex file found in current directory."
+  exit 1
+fi
+
+basename="${file%.tex}"
+
+echo "Compiling $file..."
+pdflatex -interaction=nonstopmode "$file" > /dev/null
+
+pdf_file="${basename}.pdf"
+
+if [ -f "$pdf_file" ]; then
+  echo "Opening $pdf_file..."
+  # macOS
+  if command -v open >/dev/null; then
+    open "$pdf_file"
+  # Linux
+  elif command -v xdg-open >/dev/null; then
+    xdg-open "$pdf_file"
+  else
+    echo "PDF generated: $pdf_file (no opener found)"
+  fi
+else
+  echo "Compilation failed. No PDF produced."
+fi
